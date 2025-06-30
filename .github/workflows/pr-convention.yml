@@ -1,0 +1,20 @@
+name: PR Convention
+
+on:
+    pull_request:
+        branches: [main, develop]
+
+jobs:
+    pr-convention:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Vérification nommage PR
+              run: |
+                  branch_name="${GITHUB_HEAD_REF}"
+
+                  if [[ ! "$branch_name" =~ ^(feat|fix|chore|refactor)/ ]]; then
+                    echo "::error ::PR depuis '$branch_name' non autorisée. Préfixes autorisés : feat/, fix/, chore/, refactor/"
+                    exit 1
+                  fi
+
+                  echo "PR depuis '$branch_name' autorisée"

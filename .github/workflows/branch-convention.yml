@@ -1,0 +1,30 @@
+name: Branch Convention
+
+on:
+    push:
+        tags-ignore:
+            - "**"
+        branches:
+            - "**"
+
+jobs:
+    branch-convention:
+        runs-on: ubuntu-latest
+        steps:
+            - name: Vérification de la convention de nommage des branches
+              run: |
+                  branch_name="${GITHUB_REF#refs/heads/}"
+
+                  echo "Branche en cours : $branch_name"
+
+                  if [[ "$branch_name" == "main" || "$branch_name" == "develop" ]]; then
+                    echo "::error ::Push direct interdit sur la branche '$branch_name'. Utilisez une PR."
+                    exit 1
+                  fi
+
+                  if [[ ! "$branch_name" =~ ^(feat|fix|chore|refactor)/ ]]; then
+                    echo "::error ::Nom de branche non conforme : '$branch_name'. Préfixes autorisés : feat/, fix/, chore/, refactor/"
+                    exit 1
+                  fi
+
+                  echo "Branche '$branch_name' conforme à la convention."
