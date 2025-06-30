@@ -1,0 +1,24 @@
+{
+    "name": "back",
+    "version": "1.0.0",
+    "main": "dist/app.js",
+    "scripts": {
+        "build": "tsc",
+        "start": "npm run build && node dist/app.js",
+        "create:branch": "bash scripts/create-branch.sh"
+    },
+    "dependencies": {
+        "express": "^4.19.2",
+        "logic-qcm-plus": "file:../logic-qcm-plus"
+    },
+    "devDependencies": {
+        "typescript": "^5.8.3",
+        "ts-node": "^10.9.2",
+        "@types/node": "^24.0.1",
+        "@types/express": "^4.17.21"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "description": ""
+}
