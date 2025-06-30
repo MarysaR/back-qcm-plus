@@ -1,0 +1,21 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "plugins": [
+        "@typescript-eslint",
+        "prettier"
+    ],
+    "extends": [
+        "eslint:recommended",
+        "@typescript-eslint/recommended",
+        "prettier"
+    ],
+    "rules": {
+        "prettier/prettier": "error",
+        "no-try": "error",
+        "eqeqeq": [
+            "error",
+            "never"
+        ],
+        "@typescript-eslint/no-explicit-any": "error"
+    }
+}
