@@ -15,16 +15,7 @@ jobs:
               uses: actions/checkout@v4
 
             - name: Cloner logic-qcm-plus
-              run: |
-                  git clone https://github.com/MarysaR/logic-qcm-plus.git ../logic-qcm-plus
-
-            - name: Préparer logic-qcm-plus
-              run: |
-                  mkdir -p vendor
-                  cp -R ../logic-qcm-plus vendor/logic-qcm-plus
-
-            - name: Préparer package CI
-              run: cp package.ci.json package.json
+              run: git clone https://github.com/MarysaR/logic-qcm-plus.git ../logic-qcm-plus
 
             - name: Configuration Node.js
               uses: actions/setup-node@v4
