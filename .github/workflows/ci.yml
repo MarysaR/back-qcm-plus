@@ -31,7 +31,7 @@ jobs:
                   node-version: "20"
 
             - name: Installation des dépendances
-              run: npm ci
+              run: npm install
 
             - name: Compilation TypeScript
               run: npm run build
