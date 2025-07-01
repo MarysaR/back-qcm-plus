@@ -23,6 +23,9 @@ jobs:
                   mkdir -p vendor
                   cp -R ../logic-qcm-plus vendor/logic-qcm-plus
 
+            - name: Préparer package CI
+              run: cp package.ci.json package.json
+
             - name: Configuration Node.js
               uses: actions/setup-node@v4
               with:
