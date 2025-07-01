@@ -16,7 +16,7 @@ jobs:
 
             - name: Cloner logic-qcm-plus
               run: |
-                  git clone git@github.com:MarysaR/logic-qcm-plus.git ../logic-qcm-plus
+                  git clone https://github.com/MarysaR/logic-qcm-plus.git ../logic-qcm-plus
 
             - name: Préparer logic-qcm-plus
               run: |
