@@ -28,6 +28,11 @@ jobs:
                   rm -f package-lock.json
                   cp package.ci.json package.json
 
+            - name: Vérifier package.json actif
+              run: |
+                  echo "Contenu de package.json utilisé par la CI :"
+                  cat package.json
+
             - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
