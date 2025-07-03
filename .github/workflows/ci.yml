@@ -18,14 +18,14 @@ jobs:
               run: |
                   git clone https://github.com/MarysaR/logic-qcm-plus.git ../logic-qcm-plus
 
-            - name: Prepare vendor logic-qcm-plus
+            - name: Vendor logic-qcm-plus
               run: |
                   mkdir -p vendor
                   cp -R ../logic-qcm-plus vendor/logic-qcm-plus
 
             - name: Use CI package.json
               run: |
-                  rm -f package-lock.json       # Supprime l'ancien lock
+                  rm -f package-lock.json
                   cp package.ci.json package.json
 
             - name: Setup Node.js
@@ -34,7 +34,7 @@ jobs:
                   node-version: "20"
 
             - name: Install dependencies
-              run: npm install # installe depuis Git pour logic-qcm-plus
+              run: npm install
 
             - name: Compile TypeScript
               run: npm run build

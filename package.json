@@ -2,13 +2,14 @@
     "name": "back",
     "version": "1.0.0",
     "main": "dist/app.js",
+    "type": "module",
     "scripts": {
         "build": "tsc",
         "start": "npm run build && node dist/app.js",
         "create:branch": "bash scripts/create-branch.sh",
-        "lint": "eslint src/**/*.ts",
-        "lint:fix": "eslint src/**/*.ts --fix",
-        "format:check": "prettier --check src/**/*.ts",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --check src/**/*.ts",
         "docker:build": "bash scripts/docker-prepare.sh && docker build -t back-qcm-plus ."
     },
     "dependencies": {

@@ -3,12 +3,11 @@
     "version": "1.0.0",
     "main": "dist/app.js",
     "scripts": {
-        "build": "tsc",
-        "start": "node dist/app.js"
+        "build": "tsc"
     },
     "dependencies": {
         "express": "^4.19.2",
-        "logic-qcm-plus": "git+https://github.com/MarysaR/logic-qcm-plus.git"
+        "logic-qcm-plus": "file:vendor/logic-qcm-plus"
     },
     "devDependencies": {
         "@types/express": "^4.17.21",

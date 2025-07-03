@@ -2,6 +2,7 @@
     "name": "back",
     "version": "1.0.0",
     "main": "dist/app.js",
+    "type": "commonjs",
     "scripts": {
         "build": "tsc",
         "start": "node dist/app.js"
