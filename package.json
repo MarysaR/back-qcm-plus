@@ -2,20 +2,31 @@
     "name": "back",
     "version": "1.0.0",
     "main": "dist/app.js",
+    "type": "module",
     "scripts": {
         "build": "tsc",
         "start": "npm run build && node dist/app.js",
-        "create:branch": "bash scripts/create-branch.sh"
+        "create:branch": "bash scripts/create-branch.sh",
+        "lint": "eslint .",
+        "lint:fix": "eslint . --fix",
+        "format": "prettier --check src/**/*.ts",
+        "docker:build": "bash scripts/docker-prepare.sh && docker build -t back-qcm-plus ."
     },
     "dependencies": {
         "express": "^4.19.2",
         "logic-qcm-plus": "file:../logic-qcm-plus"
     },
     "devDependencies": {
-        "typescript": "^5.8.3",
-        "ts-node": "^10.9.2",
+        "@types/express": "^4.17.21",
         "@types/node": "^24.0.1",
-        "@types/express": "^4.17.21"
+        "@typescript-eslint/eslint-plugin": "^8.35.0",
+        "@typescript-eslint/parser": "^8.35.0",
+        "eslint": "^9.30.0",
+        "eslint-config-prettier": "^10.1.5",
+        "eslint-plugin-prettier": "^5.5.1",
+        "prettier": "^3.6.2",
+        "ts-node": "^10.9.2",
+        "typescript": "^5.8.3"
     },
     "keywords": [],
     "author": "",

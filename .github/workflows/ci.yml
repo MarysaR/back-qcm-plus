@@ -11,22 +11,41 @@ jobs:
         runs-on: ubuntu-latest
 
         steps:
-            - name: Récupération du code source
+            - name: Checkout code
               uses: actions/checkout@v4
 
-            - name: Configuration Node.js
+            - name: Clone logic-qcm-plus
+              run: |
+                  git clone https://github.com/MarysaR/logic-qcm-plus.git ../logic-qcm-plus
+
+            - name: Vendor logic-qcm-plus
+              run: |
+                  mkdir -p vendor
+                  cp -R ../logic-qcm-plus vendor/logic-qcm-plus
+
+            - name: Use CI package.json
+              run: |
+                  rm -f package-lock.json
+                  cp package.ci.json package.json
+
+            - name: Vérifier package.json actif
+              run: |
+                  echo "Contenu de package.json utilisé par la CI :"
+                  cat package.json
+
+            - name: Setup Node.js
               uses: actions/setup-node@v4
               with:
                   node-version: "20"
 
-            - name: Installation des dépendances
-              run: npm ci
+            - name: Install dependencies
+              run: npm install
 
-            - name: Compilation TypeScript
+            - name: Compile TypeScript
               run: npm run build
 
-            - name: Lint avec ESLint
+            - name: Lint with ESLint
               run: npm run lint
 
-            - name: Vérification Prettier
-              run: npm run format -- --check
+            - name: Check formatting with Prettier
+              run: npm run format:check
