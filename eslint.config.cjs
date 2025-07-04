@@ -1,10 +1,10 @@
-import tsPlugin from '@typescript-eslint/eslint-plugin';
-import tsParser from '@typescript-eslint/parser';
-import prettierPlugin from 'eslint-plugin-prettier';
+const tsPlugin = require('@typescript-eslint/eslint-plugin');
+const tsParser = require('@typescript-eslint/parser');
+const prettierPlugin = require('eslint-plugin-prettier');
 
-export default [
+module.exports = [
     {
-        ignores: ["dist/**"],
+        ignores: ['dist/**'],
     },
     {
         files: ['**/*.ts'],
@@ -18,7 +18,7 @@ export default [
         rules: {
             ...tsPlugin.configs.recommended.rules,
             'prettier/prettier': 'error',
-            'eqeqeq': 'off',
+            eqeqeq: 'off',
             '@typescript-eslint/no-explicit-any': 'error',
         },
     },
