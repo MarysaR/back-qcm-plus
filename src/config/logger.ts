@@ -1,6 +1,6 @@
-import { IncomingMessage } from 'http';
+import { IncomingMessage, ServerResponse } from 'http';
 import pino from 'pino';
-import pinoHttp from 'pino-http';
+import pinoHttp, { Options } from 'pino-http';
 
 export const logger = pino({
   level: 'trace',
@@ -18,43 +18,43 @@ export const httpLogger = pinoHttp({
     return 'info';
   },
   serializers: {
-    req(req) {
-      const expressReq = req as IncomingMessage & {
-        body?: unknown;
-        query?: unknown;
-      };
-
+    req(req: IncomingMessage & { body?: unknown; query?: unknown }) {
       const filteredHeaders = { ...req.headers };
 
-      delete filteredHeaders['user-agent'];
-      delete filteredHeaders['accept'];
-      delete filteredHeaders['accept-language'];
-      delete filteredHeaders['accept-encoding'];
-      delete filteredHeaders['dnt'];
-      delete filteredHeaders['sec-gpc'];
-      delete filteredHeaders['connection'];
-      delete filteredHeaders['upgrade-insecure-requests'];
-      delete filteredHeaders['sec-fetch-dest'];
-      delete filteredHeaders['sec-fetch-mode'];
-      delete filteredHeaders['sec-fetch-site'];
-      delete filteredHeaders['sec-fetch-user'];
-      delete filteredHeaders['if-none-match'];
-      delete filteredHeaders['priority'];
+      [
+        'user-agent',
+        'accept',
+        'accept-language',
+        'accept-encoding',
+        'dnt',
+        'sec-gpc',
+        'connection',
+        'upgrade-insecure-requests',
+        'sec-fetch-dest',
+        'sec-fetch-mode',
+        'sec-fetch-site',
+        'sec-fetch-user',
+        'if-none-match',
+        'priority',
+      ].forEach((header) => delete filteredHeaders[header]);
 
       return {
         method: req.method,
         url: req.url,
         headers: filteredHeaders,
-        body: expressReq.body,
-        query: expressReq.query,
+        body: req.body,
+        query: req.query,
         ip: req.socket?.remoteAddress,
         token: req.headers['authorization'] || null,
       };
     },
-    res(res) {
+    res(res: ServerResponse) {
       return {
         statusCode: res.statusCode,
       };
     },
   },
-});
+} as Options<
+  IncomingMessage & { body?: unknown; query?: unknown },
+  ServerResponse
+>);
