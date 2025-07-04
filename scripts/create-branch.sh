@@ -12,7 +12,7 @@ fi
 
 # Vérifie les arguments
 if [ -z "$1" ] || [ -z "$2" ]; then
-  echo "Usage : npm run create:branch -- feat|fix nom-de-la-branche"
+  echo "Usage : npm run create:branch -- feat|fix|chore|refactor nom-de-la-branche"
   exit 1
 fi
 
