@@ -12,12 +12,16 @@
         "esModuleInterop": true,
         "forceConsistentCasingInFileNames": true,
         "skipLibCheck": true,
-        "types": [],
         "declaration": true,
         "sourceMap": true,
         "typeRoots": [
+            "./src/types",
             "./node_modules/@types",
             "../logic-qcm-plus/dist/types"
+        ],
+        "types": [
+            "node",
+            "pino-http"
         ]
     },
     "include": [
