@@ -19,8 +19,8 @@ fi
 TYPE=$1
 
 # Vérifie que le type est autorisé
-if [[ "$TYPE" != "feat" && "$TYPE" != "fix" ]]; then
-  echo "Type de branche invalide : $TYPE (utiliser feat ou fix)"
+if [[ "$TYPE" != "feat" && "$TYPE" != "fix" && "$TYPE" != "chore" && "$TYPE" != "refactor" ]]; then
+  echo "Type de branche invalide : $TYPE (utiliser feat, fix, chore ou refactor)"
   exit 1
 fi
 
