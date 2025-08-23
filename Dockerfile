@@ -19,7 +19,7 @@ RUN sed -i '/"prepare"/d' vendor/logic-qcm-plus/package.json
 # 4️⃣ Installation des dépendances (logic ne rebuild pas)
 RUN npm install
 
-# 5️⃣ On copie votre code source de back
+# 5️⃣ On copie src du back
 COPY src/ ./src
 
 # 6️⃣ Compilation finale de back
