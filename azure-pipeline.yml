@@ -48,33 +48,37 @@ stages:
             displayName: 'Vérifier le formatage'
 
   - stage: Deploy_Test
-    displayName: 'Deploy to qcm_plus_test'
+    displayName: 'Deploy to Azure TEST'
     dependsOn: Build
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
     jobs:
       - deployment: DeployTest
-        displayName: 'Déploiement TEST'
         environment: qcm_plus_test
         strategy:
           runOnce:
             deploy:
               steps:
-                - script: |
-                    echo "Déploiement sur TEST avec la DB : $(DATABASE_URL_TEST)"
-                  displayName: 'Utiliser DATABASE_URL_TEST'
+                - task: AzureWebApp@1
+                  inputs:
+                    azureSubscription: 'qcm-plus-devops-connection'
+                    appName: 'qcm-plus-test'
+                    package: '$(System.DefaultWorkingDirectory)/dist'
+                  displayName: 'Deploy to Azure WebApp TEST'
 
   - stage: Deploy_Prod
-    displayName: 'Deploy to qcm_plus_prod'
+    displayName: 'Deploy to Azure PROD'
     dependsOn: Build
     condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
     jobs:
       - deployment: DeployProd
-        displayName: 'Déploiement PROD'
         environment: qcm_plus_prod
         strategy:
           runOnce:
             deploy:
               steps:
-                - script: |
-                    echo "Déploiement sur PROD avec la DB : $(DATABASE_URL_PROD)"
-                  displayName: 'Utiliser DATABASE_URL_PROD'
+                - task: AzureWebApp@1
+                  inputs:
+                    azureSubscription: 'qcm-plus-devops-connection'
+                    appName: 'qcm-plus-prod'
+                    package: '$(System.DefaultWorkingDirectory)/dist'
+                  displayName: 'Deploy to Azure WebApp PROD'
