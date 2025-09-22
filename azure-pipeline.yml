@@ -1,0 +1,40 @@
+trigger:
+  branches:
+    include:
+      - develop
+      - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+steps:
+  - task: NodeTool@0
+    inputs:
+      versionSpec: '20.x'
+    displayName: 'Utiliser Node.js'
+
+  - checkout: self
+    displayName: 'Checkout back repo'
+
+  - script: |
+      git clone https://github.com/MarysaR/logic-qcm-plus.git ../logic-qcm-plus
+      mkdir -p vendor
+      cp -R ../logic-qcm-plus vendor/logic-qcm-plus
+    displayName: 'Préparer vendor logic-qcm-plus'
+
+  - script: |
+      rm -f package-lock.json
+      cp package.ci.json package.json
+    displayName: 'Utiliser package.json pour CI'
+
+  - script: npm install
+    displayName: 'Installer les dépendances'
+
+  - script: npm run build
+    displayName: 'Compiler le projet'
+
+  - script: npm run lint
+    displayName: 'Lint'
+
+  - script: npm run format:check
+    displayName: 'Vérifier le formatage'
