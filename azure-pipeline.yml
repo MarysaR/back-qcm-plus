@@ -47,6 +47,12 @@ stages:
           - script: npm run format:check
             displayName: 'Vérifier le formatage'
 
+          - task: PublishBuildArtifacts@1
+            inputs:
+              PathtoPublish: 'dist'
+              ArtifactName: 'drop'
+            displayName: 'Publier artefact dist'
+
   - stage: Deploy_Test
     displayName: 'Deploy to Azure TEST'
     dependsOn: Build
@@ -58,11 +64,19 @@ stages:
           runOnce:
             deploy:
               steps:
+                - task: DownloadBuildArtifacts@1
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'drop'
+                    downloadPath: '$(System.DefaultWorkingDirectory)'
+                  displayName: 'Télécharger artefact dist'
+
                 - task: AzureWebApp@1
                   inputs:
                     azureSubscription: 'qcm-plus-devops-connection'
                     appName: 'qcm-plus-test'
-                    package: '$(System.DefaultWorkingDirectory)/dist'
+                    package: '$(System.DefaultWorkingDirectory)/drop/dist'
                   displayName: 'Deploy to Azure WebApp TEST'
 
   - stage: Deploy_Prod
@@ -76,9 +90,17 @@ stages:
           runOnce:
             deploy:
               steps:
+                - task: DownloadBuildArtifacts@1
+                  inputs:
+                    buildType: 'current'
+                    downloadType: 'single'
+                    artifactName: 'drop'
+                    downloadPath: '$(System.DefaultWorkingDirectory)'
+                  displayName: 'Télécharger artefact dist'
+
                 - task: AzureWebApp@1
                   inputs:
                     azureSubscription: 'qcm-plus-devops-connection'
                     appName: 'qcm-plus-prod'
-                    package: '$(System.DefaultWorkingDirectory)/dist'
+                    package: '$(System.DefaultWorkingDirectory)/drop/dist'
                   displayName: 'Deploy to Azure WebApp PROD'
