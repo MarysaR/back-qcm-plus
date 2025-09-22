@@ -76,7 +76,7 @@ stages:
                   inputs:
                     azureSubscription: 'qcm-plus-devops-connection'
                     appName: 'qcm-plus-test'
-                    package: '$(System.DefaultWorkingDirectory)/drop/dist'
+                    package: '$(System.DefaultWorkingDirectory)/drop'
                   displayName: 'Deploy to Azure WebApp TEST'
 
   - stage: Deploy_Prod
@@ -102,5 +102,5 @@ stages:
                   inputs:
                     azureSubscription: 'qcm-plus-devops-connection'
                     appName: 'qcm-plus-prod'
-                    package: '$(System.DefaultWorkingDirectory)/drop/dist'
+                    package: '$(System.DefaultWorkingDirectory)/drop'
                   displayName: 'Deploy to Azure WebApp PROD'
