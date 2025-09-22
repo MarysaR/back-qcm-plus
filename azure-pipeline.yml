@@ -7,34 +7,74 @@ trigger:
 pool:
   vmImage: 'ubuntu-latest'
 
-steps:
-  - task: NodeTool@0
-    inputs:
-      versionSpec: '20.x'
-    displayName: 'Utiliser Node.js'
+variables:
+  - group: qcm_plus_variables
 
-  - checkout: self
-    displayName: 'Checkout back repo'
+stages:
+  - stage: Build
+    displayName: 'Build & Checks'
+    jobs:
+      - job: Build
+        steps:
+          - task: NodeTool@0
+            inputs:
+              versionSpec: '20.x'
+            displayName: 'Utiliser Node.js'
 
-  - script: |
-      git clone https://github.com/MarysaR/logic-qcm-plus.git ../logic-qcm-plus
-      mkdir -p vendor
-      cp -R ../logic-qcm-plus vendor/logic-qcm-plus
-    displayName: 'Préparer vendor logic-qcm-plus'
+          - checkout: self
+            displayName: 'Checkout back repo'
 
-  - script: |
-      rm -f package-lock.json
-      cp package.ci.json package.json
-    displayName: 'Utiliser package.json pour CI'
+          - script: |
+              git clone https://github.com/MarysaR/logic-qcm-plus.git ../logic-qcm-plus
+              mkdir -p vendor
+              cp -R ../logic-qcm-plus vendor/logic-qcm-plus
+            displayName: 'Préparer vendor logic-qcm-plus'
 
-  - script: npm install
-    displayName: 'Installer les dépendances'
+          - script: |
+              rm -f package-lock.json
+              cp package.ci.json package.json
+            displayName: 'Utiliser package.json pour CI'
 
-  - script: npm run build
-    displayName: 'Compiler le projet'
+          - script: npm install
+            displayName: 'Installer les dépendances'
 
-  - script: npm run lint
-    displayName: 'Lint'
+          - script: npm run build
+            displayName: 'Compiler le projet'
 
-  - script: npm run format:check
-    displayName: 'Vérifier le formatage'
+          - script: npm run lint
+            displayName: 'Lint'
+
+          - script: npm run format:check
+            displayName: 'Vérifier le formatage'
+
+  - stage: Deploy_Test
+    displayName: 'Deploy to qcm_plus_test'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/develop'))
+    jobs:
+      - deployment: DeployTest
+        displayName: 'Déploiement TEST'
+        environment: qcm_plus_test
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: |
+                    echo "Déploiement sur TEST avec la DB : $(DATABASE_URL_TEST)"
+                  displayName: 'Utiliser DATABASE_URL_TEST'
+
+  - stage: Deploy_Prod
+    displayName: 'Deploy to qcm_plus_prod'
+    dependsOn: Build
+    condition: and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/main'))
+    jobs:
+      - deployment: DeployProd
+        displayName: 'Déploiement PROD'
+        environment: qcm_plus_prod
+        strategy:
+          runOnce:
+            deploy:
+              steps:
+                - script: |
+                    echo "Déploiement sur PROD avec la DB : $(DATABASE_URL_PROD)"
+                  displayName: 'Utiliser DATABASE_URL_PROD'
