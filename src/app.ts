@@ -15,10 +15,11 @@ app.listen(port, async () => {
   try {
     await prisma.$connect();
     logger.info('Connected to database');
-  } catch (err) {
-    logger.error('Failed to connect to database', err);
+  } catch (err: unknown) {
+    logger.error({ err }, 'Failed to connect to database');
     process.exit(1);
   }
+
   logger.info(`Server is running on port ${port}`);
 });
 
