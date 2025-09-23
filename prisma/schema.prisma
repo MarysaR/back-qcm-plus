@@ -1,0 +1,150 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum StatusEnum {
+  en_cours
+  termine
+  abandonne
+}
+
+model Role {
+  id_role     Int      @id @default(autoincrement())
+  name        String   @db.VarChar(50)
+  is_active   Boolean  @default(true)
+  created_at  DateTime @default(now())
+  description String?  @db.VarChar(255)
+
+  users AppUser[]
+
+  @@unique([name], map: "ux_role_name_ci") // attention : insensible à la casse non supporté
+}
+
+model AppUser {
+  id_user    Int      @id @default(autoincrement())
+  first_name String   @db.VarChar(100)
+  last_name  String   @db.VarChar(100)
+  login      String   @unique @db.VarChar(100)
+  password   String   @db.VarChar(255)
+  company    String?  @db.VarChar(100)
+  is_active  Boolean  @default(true)
+  created_at DateTime @default(now())
+  updated_at DateTime @default(now())
+  email      String   @unique @db.VarChar(255)
+
+  role_id Int
+  role    Role @relation(fields: [role_id], references: [id_role])
+
+  sessions UserSession[]
+}
+
+model Questionnaire {
+  id_questionnaire Int      @id @default(autoincrement())
+  name             String   @db.VarChar(255)
+  description      String?
+  is_active        Boolean  @default(true)
+  created_at       DateTime @default(now())
+  updated_at       DateTime @default(now())
+
+  versions  QuestionnaireVersion[]
+  questions QuestionnaireQuestion[]
+
+  @@unique([name], map: "ux_questionnaire_name_ci")
+}
+
+model QuestionnaireVersion {
+  id_version       Int      @id @default(autoincrement())
+  questionnaire_id Int
+  version_number   Decimal  @db.Decimal(6, 3)
+  created_at       DateTime @default(now())
+
+  questionnaire Questionnaire @relation(fields: [questionnaire_id], references: [id_questionnaire])
+  sessions      UserSession[]
+
+  @@unique([questionnaire_id, version_number], map: "uq_questionnaire_version")
+}
+
+model UserSession {
+  id_session               Int        @id @default(autoincrement())
+  user_id                  Int
+  questionnaire_version_id Int
+  status                   StatusEnum
+  started_at               DateTime?
+  completed_at             DateTime?
+
+  user        AppUser              @relation(fields: [user_id], references: [id_user])
+  version     QuestionnaireVersion @relation(fields: [questionnaire_version_id], references: [id_version])
+  result      Result?
+  userAnswers UserAnswer[]
+
+  @@unique([user_id, questionnaire_version_id], map: "ux_usersession_active")
+}
+
+model Result {
+  id_result  Int      @id @default(autoincrement())
+  session_id Int      @unique
+  score      Decimal  @db.Decimal(5, 2)
+  created_at DateTime @default(now())
+
+  session UserSession @relation(fields: [session_id], references: [id_session])
+}
+
+model Question {
+  id_question Int      @id @default(autoincrement())
+  title       String   @db.VarChar(150)
+  created_at  DateTime @default(now())
+  updated_at  DateTime @default(now())
+
+  questionnaireLinks QuestionnaireQuestion[]
+  answers            Answer[]
+  userAnswers        UserAnswer[]
+
+  @@unique([title], map: "ux_question_title_ci")
+}
+
+model QuestionnaireQuestion {
+  id_qq            Int @id @default(autoincrement())
+  questionnaire_id Int
+  question_id      Int
+  question_order   Int
+
+  questionnaire Questionnaire @relation(fields: [questionnaire_id], references: [id_questionnaire])
+  question      Question      @relation(fields: [question_id], references: [id_question])
+
+  @@unique([questionnaire_id, question_id], map: "uq_qq_questionnaire_question")
+  @@unique([questionnaire_id, question_order], map: "uq_qq_questionnaire_order")
+}
+
+model Answer {
+  id_answer     Int     @id @default(autoincrement())
+  question_id   Int
+  is_checked    Boolean @default(false)
+  is_correct    Boolean @default(false)
+  display_order Int
+
+  question    Question     @relation(fields: [question_id], references: [id_question])
+  userAnswers UserAnswer[]
+
+  @@unique([id_answer, question_id], map: "uq_answer_id_question")
+}
+
+model UserAnswer {
+  id_user_answer  Int      @id @default(autoincrement())
+  user_session_id Int
+  question_id     Int
+  answer_id       Int?
+  is_correct      Boolean  @default(false)
+  response_time   Int?
+  answered_at     DateTime @default(now())
+
+  session  UserSession @relation(fields: [user_session_id], references: [id_session])
+  question Question    @relation(fields: [question_id], references: [id_question])
+  answer   Answer?     @relation(fields: [answer_id], references: [id_answer])
+
+  @@unique([user_session_id, question_id], map: "uq_useranswer_session_question")
+}

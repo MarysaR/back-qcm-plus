@@ -38,6 +38,9 @@ stages:
           - script: npm install
             displayName: 'Installer les dépendances'
 
+          - script: npx prisma generate
+            displayName: 'Générer Prisma Client'
+
           - script: npm run build
             displayName: 'Compiler le projet'
 
