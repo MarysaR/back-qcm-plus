@@ -1,34 +1,25 @@
 {
-    "compilerOptions": {
-        "target": "ES2020",
-        "module": "commonjs",
-        "moduleResolution": "node",
-        "lib": [
-            "ES2020"
-        ],
-        "rootDir": "./src",
-        "outDir": "./dist",
-        "strict": true,
-        "esModuleInterop": true,
-        "forceConsistentCasingInFileNames": true,
-        "skipLibCheck": true,
-        "declaration": true,
-        "sourceMap": true,
-        "typeRoots": [
-            "./src/types",
-            "./node_modules/@types",
-            "../logic-qcm-plus/dist/types"
-        ],
-        "types": [
-            "node",
-            "pino-http"
-        ]
-    },
-    "include": [
-        "src/**/*"
+  "compilerOptions": {
+    "target": "ES2020",
+    "module": "commonjs",
+    "moduleResolution": "node10",
+    "ignoreDeprecations": "5.0",
+    "lib": ["ES2020"],
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "strict": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "skipLibCheck": true,
+    "declaration": true,
+    "sourceMap": true,
+    "typeRoots": [
+      "./src/types",
+      "./node_modules/@types",
+      "../logic-qcm-plus/dist/types"
     ],
-    "exclude": [
-        "node_modules",
-        "dist"
-    ]
+    "types": ["node", "pino-http"]
+  },
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
