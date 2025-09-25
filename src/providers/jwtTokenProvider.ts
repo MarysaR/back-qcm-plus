@@ -1,4 +1,4 @@
-import jwt from 'jsonwebtoken';
+import jwt, { SignCallback, VerifyErrors, JwtPayload } from 'jsonwebtoken';
 import { tokenConfig } from '../config/tokenConfig';
 import {
   TokenProvider,
@@ -20,14 +20,17 @@ export class JwtTokenProvider implements TokenProvider {
       );
     }
 
-    return new Promise((resolve, reject) => {
-      jwt.sign(payload, tokenConfig.secret!, (err, token) => {
+    return new Promise<Result<string, AppError>>((resolve) => {
+      const callback: SignCallback = (err: Error | null, token?: string) => {
         if (err || !token) {
-          reject(new TechnicalError('Impossible de générer le token JWT'));
-        } else {
-          return resolve(Ok.of(token));
+          return resolve(
+            Err.of(new TechnicalError('Impossible de générer le token JWT'))
+          );
         }
-      });
+        return resolve(Ok.of(token));
+      };
+
+      jwt.sign(payload, tokenConfig.secret!, callback);
     });
   }
 
@@ -38,19 +41,23 @@ export class JwtTokenProvider implements TokenProvider {
       );
     }
 
-    return new Promise((resolve) => {
-      jwt.verify(token, tokenConfig.secret!, (err, decoded) => {
-        if (err) {
-          if (err.name == 'TokenExpiredError') {
-            return resolve(
-              Err.of(new PermissionDeniedError('Le token a expiré'))
-            );
+    return new Promise<Result<TokenClaims, AppError>>((resolve) => {
+      jwt.verify(
+        token,
+        tokenConfig.secret!,
+        (err: VerifyErrors | null, decoded?: JwtPayload | string) => {
+          if (err) {
+            if (err.name == 'TokenExpiredError') {
+              return resolve(
+                Err.of(new PermissionDeniedError('Le token a expiré'))
+              );
+            }
+            return resolve(Err.of(new ValidationError('Token invalide')));
           }
-          return resolve(Err.of(new ValidationError('Token invalide')));
-        }
 
-        resolve(Ok.of(decoded as TokenClaims));
-      });
+          return resolve(Ok.of(decoded as TokenClaims));
+        }
+      );
     });
   }
 }
