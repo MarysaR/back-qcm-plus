@@ -1,6 +1,6 @@
 import express, { Application } from 'express';
 import cors from 'cors';
-import { logger } from './config/logger';
+import { httpLogger, logger } from './config/logger';
 import routes from './routes';
 import prisma from './config/prisma';
 
@@ -9,6 +9,8 @@ const port = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cors());
+
+app.use(httpLogger);
 
 app.use(routes);
 app.listen(port, async () => {
