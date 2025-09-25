@@ -1,34 +1,32 @@
 import { Request, Response, NextFunction } from 'express';
-import { logger } from '../config/logger';
-import { TechnicalError } from 'logic-qcm-plus';
 import { sendErrorResponse } from './httpResponse';
+import { TechnicalError } from 'logic-qcm-plus';
+import { logger } from '../config/logger';
 
 /**
- * Décorateur pour catcher automatiquement les erreurs des routes.
- * Renvoie une 500 + log en cas d'exception.
+ * Permet de catch les erreurs de façon automatique sur la route possédant le décorateur
+ * La requête renverra automatiquement une erreur 500 et log l'erreur
  */
 export function CatchErrors(): MethodDecorator {
-  return (
+  return function (
     target: object,
     propertyKey: string | symbol,
-    descriptor: PropertyDescriptor
-  ): PropertyDescriptor => {
-    const originalMethod = descriptor.value as (
-      req: Request,
-      res: Response,
-      next: NextFunction
-    ) => Promise<unknown>;
-
+    descriptor: TypedPropertyDescriptor<any>
+  ) {
+    const previousDescriptor = descriptor.value;
     descriptor.value = async function (
       req: Request,
       res: Response,
       next: NextFunction
     ) {
       try {
-        await originalMethod.apply(this, [req, res, next]);
+        await previousDescriptor.apply(this, [req, res, next]);
       } catch (e) {
         logger.error(e);
-        sendErrorResponse(res, new TechnicalError('Erreur dans le contrôleur'));
+        sendErrorResponse(
+          res,
+          new TechnicalError('Erreur dans le controlleur')
+        );
       }
     };
 
