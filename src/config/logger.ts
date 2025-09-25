@@ -1,9 +1,8 @@
 import { IncomingMessage, ServerResponse } from 'http';
 import pino, { Logger } from 'pino';
-import type { Level } from 'pino-http'; // ton stub
+import type { Level } from 'pino-http';
 import pinoHttp from 'pino-http';
 
-// On définit nos niveaux custom pour que TS infère Logger<Level>
 const customLevels = {
   fatal: 60,
   error: 50,

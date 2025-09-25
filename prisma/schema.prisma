@@ -22,7 +22,8 @@ model Role {
 
   users AppUser[]
 
-  @@unique([name], map: "ux_role_name_ci") // attention : insensible à la casse non supporté
+  @@unique([name], map: "ux_role_name_ci")
+  @@map("role")
 }
 
 model AppUser {
@@ -41,6 +42,8 @@ model AppUser {
   role    Role @relation(fields: [role_id], references: [id_role])
 
   sessions UserSession[]
+
+  @@map("app_user")
 }
 
 model Questionnaire {
@@ -55,6 +58,7 @@ model Questionnaire {
   questions QuestionnaireQuestion[]
 
   @@unique([name], map: "ux_questionnaire_name_ci")
+  @@map("questionnaire")
 }
 
 model QuestionnaireVersion {
@@ -67,6 +71,7 @@ model QuestionnaireVersion {
   sessions      UserSession[]
 
   @@unique([questionnaire_id, version_number], map: "uq_questionnaire_version")
+  @@map("questionnaire_version")
 }
 
 model UserSession {
@@ -83,6 +88,7 @@ model UserSession {
   userAnswers UserAnswer[]
 
   @@unique([user_id, questionnaire_version_id], map: "ux_usersession_active")
+  @@map("user_session")
 }
 
 model Result {
@@ -92,6 +98,8 @@ model Result {
   created_at DateTime @default(now())
 
   session UserSession @relation(fields: [session_id], references: [id_session])
+
+  @@map("result")
 }
 
 model Question {
@@ -105,6 +113,7 @@ model Question {
   userAnswers        UserAnswer[]
 
   @@unique([title], map: "ux_question_title_ci")
+  @@map("question")
 }
 
 model QuestionnaireQuestion {
@@ -118,6 +127,7 @@ model QuestionnaireQuestion {
 
   @@unique([questionnaire_id, question_id], map: "uq_qq_questionnaire_question")
   @@unique([questionnaire_id, question_order], map: "uq_qq_questionnaire_order")
+  @@map("questionnaire_question")
 }
 
 model Answer {
@@ -131,6 +141,7 @@ model Answer {
   userAnswers UserAnswer[]
 
   @@unique([id_answer, question_id], map: "uq_answer_id_question")
+  @@map("answer")
 }
 
 model UserAnswer {
@@ -147,4 +158,5 @@ model UserAnswer {
   answer   Answer?     @relation(fields: [answer_id], references: [id_answer])
 
   @@unique([user_session_id, question_id], map: "uq_useranswer_session_question")
+  @@map("user_answer")
 }

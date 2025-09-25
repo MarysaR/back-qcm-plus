@@ -14,12 +14,16 @@
     "pino": "^9.7.0",
     "pino-http": "^10.5.0",
     "pino-pretty": "^13.0.0",
-    "logic-qcm-plus": "file:vendor/logic-qcm-plus"
+    "logic-qcm-plus": "file:vendor/logic-qcm-plus",
+    "bcrypt": "^6.0.0",
+    "jsonwebtoken": "^9.0.2"
   },
   "devDependencies": {
     "@types/express": "^4.17.21",
     "@types/node": "^24.0.1",
     "@types/cors": "^2.8.19",
+    "@types/bcrypt": "^6.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "typescript": "^5.8.3",
     "eslint": "^9.30.0",
     "prettier": "^3.6.2",
