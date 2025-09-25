@@ -1,11 +1,10 @@
 import { Request, Response, NextFunction } from 'express';
-import { sendErrorResponse } from './httpResponse';
 import { TechnicalError } from 'logic-qcm-plus';
 import { logger } from '../config/logger';
 
 /**
- * Permet de catch les erreurs de façon automatique sur la route possédant le décorateur
- * La requête renverra automatiquement une erreur 500 et log l'erreur
+ * Décorateur qui catch les erreurs inattendues dans un contrôleur
+ * et renvoie automatiquement une 500 avec log.
  */
 export function CatchErrors(): MethodDecorator {
   return function (
@@ -23,10 +22,11 @@ export function CatchErrors(): MethodDecorator {
         await previousDescriptor.apply(this, [req, res, next]);
       } catch (e) {
         logger.error(e);
-        sendErrorResponse(
-          res,
-          new TechnicalError('Erreur dans le controlleur')
-        );
+
+        const error = new TechnicalError('Erreur interne dans le contrôleur');
+        const { code, message } = error.toHttpError();
+
+        return res.status(code).json({ code, error: message });
       }
     };
 
