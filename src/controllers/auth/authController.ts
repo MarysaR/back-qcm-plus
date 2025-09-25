@@ -2,6 +2,7 @@
 import { Request, Response } from 'express';
 import {
   AuthenticateUserUseCase,
+  GetCurrentUserUseCase,
   UserRepository,
   PasswordHasher,
   TokenProvider,
@@ -49,5 +50,25 @@ export class AuthController {
     }
 
     return Ok.of({ token: result.value });
+  }
+
+  @CatchErrors()
+  @HandleResult()
+  async me(req: Request, _res: Response): Promise<Result<unknown, AppError>> {
+    if (!req.claims) {
+      return Err.of(new ValidationError('Token JWT manquant ou invalide'));
+    }
+
+    const userRepository: UserRepository = new UserPrismaRepository();
+    const getCurrentUserUseCase = new GetCurrentUserUseCase(userRepository);
+
+    const result = await getCurrentUserUseCase.execute(req.claims);
+
+    if (result.isOk()) {
+      const { password, ...safeUser } = result.value;
+      return Ok.of(safeUser);
+    }
+
+    return result;
   }
 }
