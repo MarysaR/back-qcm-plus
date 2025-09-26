@@ -1,14 +1,11 @@
 import { Request, Response, NextFunction } from 'express';
 import { Result, AppError } from 'logic-qcm-plus';
+import { HTTP_STATUS } from 'logic-qcm-plus';
 
 /**
  * Décorateur qui transforme un `Result<T, AppError>` en réponse HTTP.
  * - Si `successStatus` est fourni → il est utilisé.
  * - Sinon → le code est choisi automatiquement selon la méthode HTTP :
- *   - GET → 200 OK
- *   - POST → 201 Created
- *   - PUT / PATCH → 200 OK
- *   - DELETE → 204 No Content
  *
  * @param {number} [successStatus] Code HTTP en cas de succès
  * @returns {MethodDecorator} Décorateur de méthode pour contrôleur Express
@@ -38,22 +35,22 @@ export function HandleResult(successStatus?: number): MethodDecorator {
         const { code, message } = result.error.toHttpError();
         return res.status(code).json({ code, error: message });
       }
-
+      // retest
       let status = successStatus;
       if (!status) {
         switch (req.method) {
           case 'POST':
-            status = 201;
+            status = HTTP_STATUS.CREATED;
             break;
           case 'DELETE':
-            status = 204;
+            status = HTTP_STATUS.NO_CONTENT;
             break;
           case 'PUT':
           case 'PATCH':
-            status = 200;
+            status = HTTP_STATUS.OK;
             break;
           default:
-            status = 200;
+            status = HTTP_STATUS.OK;
         }
       }
 
