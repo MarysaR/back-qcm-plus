@@ -18,6 +18,9 @@ export class UserController {
   }
 
   public async createUser(req: Request, res: Response): Promise<void> {
+
+    console.log('Requête reçue dans controlleur:', req.body);
+
     try {
       const user = req.body;
 
@@ -55,6 +58,7 @@ export class UserController {
 
       // Appel de la méthode pour créer l'utilisateur
       const result = await this.createUserUseCase.createUser(user);
+      console.log('Résultat du use case :', result);
       res.status(201).json(result);
     } catch (error) {
       if (error instanceof ValidationError || error instanceof AlreadyExistError) {
