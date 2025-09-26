@@ -11,6 +11,7 @@ import {
   AppError,
   Err,
   Ok,
+  LogoutUserUseCase,
 } from 'logic-qcm-plus';
 import { CatchErrors } from '../../utils/catchErrors';
 import { HandleResult } from '../../utils/handleResult';
@@ -70,5 +71,23 @@ export class AuthController {
     }
 
     return result;
+  }
+
+  @CatchErrors()
+  @HandleResult()
+  async logout(
+    req: Request,
+    _res: Response
+  ): Promise<Result<{ message: string }, AppError>> {
+    const { token } = req.body;
+
+    const logoutUserUseCase = new LogoutUserUseCase();
+
+    const result = await logoutUserUseCase.execute(token);
+    if (result.isOk()) {
+      return Ok.of({ message: 'Déconnecté avec succès' });
+    }
+
+    return Err.of(result.error);
   }
 }

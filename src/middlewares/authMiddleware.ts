@@ -17,8 +17,10 @@ export const authMiddleware = async (
     const error = new ValidationError(
       'En-tête Authorization manquant ou incorrect'
     );
+
     const { code, message } = error.toHttpError();
     res.status(code).json({ code, error: message });
+
     return;
   }
 
@@ -31,8 +33,10 @@ export const authMiddleware = async (
     const error = new PermissionDeniedError(
       'Le token fourni est invalide ou a expiré'
     );
+
     const { code, message } = error.toHttpError();
     res.status(code).json({ code, error: message });
+
     return;
   }
 
