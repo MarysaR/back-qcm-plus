@@ -5,12 +5,14 @@ import {
   NotFoundError,
   Ok,
   Result,
+  TechnicalError,
   User,
   UserRepository,
 } from 'logic-qcm-plus';
 import prisma from '../config/prisma';
 
 export class UserPrismaRepository implements UserRepository {
+
   async getUserByEmail(email: string): Promise<Result<User, AppError>> {
     const user = await prisma.appUser.findUnique({
       where: { email },
@@ -57,6 +59,35 @@ export class UserPrismaRepository implements UserRepository {
         isActive: user.role.is_active,
         description: user.role.description ?? undefined,
       },
+      company: user.company ?? '',
+      firstName: user.first_name,
+      lastName: user.last_name,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
     };
+  }
+
+
+  async createUser(user: User): Promise<Ok<void, AppError> | Err<void, AppError>> {
+    try {
+      await prisma.appUser.create({
+        data: {
+          first_name: user.firstName,
+          last_name: user.lastName,
+          login: user.login,
+          password: user.password,
+          company: user.company,
+          email: user.email,
+          role_id: user.roleId,
+          is_active: user.isActive,
+          created_at: user.createdAt,
+          updated_at: user.updatedAt,
+        },
+      });
+
+      return Ok.of<void, AppError>(undefined);
+    } catch (error) {
+      return Err.of(new TechnicalError('Erreur lors de la création de l\'utilisateur'));
+    }
   }
 }

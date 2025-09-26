@@ -13,4 +13,13 @@ userRouter.get('/users', (req, res) => {
   userController.getUsers(req, res);
 });
 
+/**
+ * @route POST /user
+ * @desc Crée un nouvel utilisateur
+ * @access Public (pas de middleware ici)
+ */
+userRouter.post('/users', (req, res) => {
+  userController.createUser(req, res);
+});
+
 export default userRouter;
