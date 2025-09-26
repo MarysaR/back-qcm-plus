@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { Result, AppError } from 'logic-qcm-plus';
-import { HTTP_STATUS } from '../constants/httpStatus';
+import { HTTP_STATUS } from 'logic-qcm-plus';
 
 /**
  * Décorateur qui transforme un `Result<T, AppError>` en réponse HTTP.
