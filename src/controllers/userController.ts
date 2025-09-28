@@ -1,7 +1,8 @@
 import { Request, Response } from 'express';
-import { GetUsersUseCase, CreateUserUseCase, RoleEnum, HTTP_STATUS } from 'logic-qcm-plus';
+import { GetUsersUseCase, CreateUserUseCase, RoleEnum } from 'logic-qcm-plus';
 import { UserPrismaRepository } from '../repositories/user-prisma-repository';
 import { ValidationError, AlreadyExistError } from 'logic-qcm-plus';
+import { HTTP_STATUS } from '../constants/httpStatus';
 
 export class UserController {
   private readonly getUsersUseCase = new GetUsersUseCase();
@@ -41,14 +42,12 @@ export class UserController {
 
     const result = await this.createUserUseCase.createUser(curentUserRoleId, user);
   
-    if (result) {
-      res.status(HTTP_STATUS.CREATED).json(result);
+    if (result instanceof ValidationError || result instanceof AlreadyExistError) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.message });
+    } else if (result.isOk()) {
+      res.status(HTTP_STATUS.CREATED).json({ user: result.value });
     } else {
-      if (result instanceof ValidationError || result instanceof AlreadyExistError) {
-        res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.message });
-      } else {
-        res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
-      }
+      res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({ error: 'Internal server error' });
     }
   }
 }
