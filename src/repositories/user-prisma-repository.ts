@@ -13,9 +13,6 @@ import {
 import prisma from '../config/prisma';
 
 export class UserPrismaRepository implements UserRepository {
-
-
-
   async getUserByEmail(email: string): Promise<Result<User, AppError>> {
     const user = await prisma.appUser.findUnique({
       where: { email },
@@ -70,10 +67,11 @@ export class UserPrismaRepository implements UserRepository {
     };
   }
 
-
-  async createUser(user: User): Promise<Ok<void, AppError> | Err<void, AppError>> {
+  async createUser(
+    user: User
+  ): Promise<Ok<void, AppError> | Err<void, AppError>> {
     console.log('createUser called with:', user);
-  
+
     const result = await prisma.appUser
       .create({
         data: {
@@ -94,7 +92,7 @@ export class UserPrismaRepository implements UserRepository {
       .then(() => Ok.of(undefined))
       .catch((error: any) => {
         console.error('Erreur Prisma lors de la création du user :', error);
-  
+
         if (error.code === 'P2002') {
           return Err.of(
             new ValidationError(
@@ -102,15 +100,14 @@ export class UserPrismaRepository implements UserRepository {
             )
           );
         }
-  
+
         return Err.of(
           new TechnicalError(
             `Erreur lors de la création de l'utilisateur : ${error.message}`
           )
         );
       });
-  
+
     return result as Ok<void, AppError> | Err<void, AppError>;
   }
-  
 }
