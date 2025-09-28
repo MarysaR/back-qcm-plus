@@ -14,7 +14,7 @@ userRouter.get('/users', (req, res) => {
 });
 
 /**
- * @route POST /user
+ * @route POST /users
  * @desc Crée un nouvel utilisateur
  * @access Public (pas de middleware ici)
  */

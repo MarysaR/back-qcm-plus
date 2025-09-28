@@ -1,13 +1,15 @@
 import { Request, Response } from 'express';
-import { GetUsersUseCase, CreateUserUseCase, RoleEnum } from 'logic-qcm-plus';
+import { GetUsersUseCase, CreateUserUseCase,   PasswordHasher} from 'logic-qcm-plus';
 import { UserPrismaRepository } from '../repositories/user-prisma-repository';
 import { ValidationError, AlreadyExistError } from 'logic-qcm-plus';
 import { HTTP_STATUS } from '../constants/httpStatus';
+import { BcryptPasswordHasher } from '../providers/bcryptPasswordHasher';
 
 export class UserController {
   private readonly getUsersUseCase = new GetUsersUseCase();
-  private userRepository = new UserPrismaRepository
-  private createUserUseCase = new CreateUserUseCase(this.userRepository);
+  private userRepository = new UserPrismaRepository();
+  private passwordHasher: PasswordHasher = new BcryptPasswordHasher();
+  private createUserUseCase = new CreateUserUseCase(this.userRepository, this.passwordHasher);
 
   public getUsers(req: Request, res: Response): void {
     const result = this.getUsersUseCase.execute();
@@ -20,11 +22,10 @@ export class UserController {
 
   public async createUser(req: Request, res: Response): Promise<void> {
     console.log('Requête reçue dans controlleur:', req.body);
-    console.log('Utilisateur courant coté back:', req.user);
+    console.log('Utilisateur courant coté back:', req.body.currentUserRoleId);
   
     const user = req.body;
-    const curentUserRoleId = req.claims.roleId;
-  //todo: supprimer nombre magique remplacer par http-status-codes
+    const curentUserRoleId = req.body.currentUserRoleId;
 
     if (!curentUserRoleId || curentUserRoleId !== 1) {
       res.status(HTTP_STATUS.FORBIDDEN).json({ error: 'Accès interdit : rôle ADMIN requis.' });
@@ -38,6 +39,7 @@ export class UserController {
       'firstName',
       'lastName',
       'company',
+      'roleId'
     ];
 
     const result = await this.createUserUseCase.createUser(curentUserRoleId, user);
