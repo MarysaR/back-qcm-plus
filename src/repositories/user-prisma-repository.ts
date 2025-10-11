@@ -48,10 +48,15 @@ export class UserPrismaRepository implements UserRepository {
   private mapToDomain(user: AppUser & { role: Role }): User {
     return {
       id: user.id_user,
+      firstName: user.first_name,
+      lastName: user.last_name,
       login: user.login,
       email: user.email,
       password: user.password,
+      company: user.company ?? undefined,
       isActive: user.is_active,
+      createdAt: user.created_at,
+      updatedAt: user.updated_at,
       roleId: user.role_id,
       role: {
         id: user.role.id_role,

@@ -30,3 +30,4 @@ docker-compose.override.yml
 vendor
 
 /src/generated/prisma
+/prisma/migrations
