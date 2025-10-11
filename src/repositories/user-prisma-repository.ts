@@ -12,6 +12,7 @@ import {
 import prisma from '../config/prisma';
 
 export class UserPrismaRepository implements UserRepository {
+
   async getUserByEmail(email: string): Promise<Result<User, AppError>> {
     const user = await prisma.appUser.findUnique({
       where: { email },
