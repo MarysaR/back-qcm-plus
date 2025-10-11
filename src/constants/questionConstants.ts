@@ -1,0 +1,2 @@
+export const QUESTION_ORDER_INCREMENT = 1;
+export const INITIAL_QUESTION_ORDER = 1;

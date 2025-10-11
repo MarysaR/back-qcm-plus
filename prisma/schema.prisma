@@ -133,9 +133,12 @@ model QuestionnaireQuestion {
 model Answer {
   id_answer     Int     @id @default(autoincrement())
   question_id   Int
+  text          String  @db.VarChar(255)
   is_checked    Boolean @default(false)
   is_correct    Boolean @default(false)
   display_order Int
+  created_at    DateTime @default(now())
+  updated_at    DateTime @default(now())
 
   question    Question     @relation(fields: [question_id], references: [id_question])
   userAnswers UserAnswer[]
