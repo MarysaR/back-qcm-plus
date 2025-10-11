@@ -48,12 +48,8 @@ export class QuestionnaireController {
       currentUser,
       Number(id)
     );
+
     if (result.isErr()) {
-      if (result.error instanceof NotFoundError) {
-        return Err.of(
-          new NotFoundError('Questionnaire introuvable dans la base de données')
-        );
-      }
       return Err.of(result.error);
     }
 
@@ -65,11 +61,16 @@ export class QuestionnaireController {
   async createQuestionnaire(
     req: Request,
     _res: Response
-  ): Promise<Result<Questionnaire, AppError>> {
+  ): Promise<Result<void, AppError>> {
     const { name, description } = req.body || {};
+    const currentUser = claimsToUser(req.claims);
 
     if (name == undefined) {
       return Err.of(new ValidationError('Champ "name" manquant'));
+    }
+
+    if (!currentUser) {
+      return Err.of(new PermissionDeniedError('Utilisateur non authentifié'));
     }
 
     const questionnaireRepository: QuestionnaireRepository =
@@ -78,30 +79,15 @@ export class QuestionnaireController {
       questionnaireRepository
     );
 
-    const result = await createQuestionnaireUseCase.execute({
+    const result = await createQuestionnaireUseCase.execute(currentUser, {
       name,
       description,
     });
+
     if (result.isErr()) {
       return Err.of(result.error);
     }
 
-    const reload = await questionnaireRepository.getQuestionnaireByName(
-      result.value.name
-    );
-
-    if (reload.isOk()) {
-      return Ok.of(reload.value);
-    }
-
-    if (reload.isErr() && reload.error instanceof NotFoundError) {
-      return Ok.of(result.value);
-    }
-
-    if (reload.isErr()) {
-      return Err.of(reload.error);
-    }
-
-    return Ok.of(result.value);
+    return Ok.of(undefined);
   }
 }
