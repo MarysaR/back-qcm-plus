@@ -8,7 +8,7 @@ const router = Router();
 
 router.use('/auth', authRouter);
 router.use(userRouter);
-router.use('/questionnaire', questionnaireRouter);
+router.use(questionnaireRouter);
 router.use(questionRouter);
 
 export default router;

@@ -11,11 +11,55 @@ import {
   TechnicalError,
   CreateQuestionCommand,
   CreateAnswerCommand,
+  Question,
+  NotFoundError,
 } from 'logic-qcm-plus';
 
 import prisma from '../config/prisma';
 
 export class QuestionPrismaRepository implements QuestionRepository {
+  async getQuestionsOfQuestionnaire(
+    questionnaireId: number
+  ): Promise<Result<Question[], AppError>> {
+    const rows = await prisma.question.findMany({
+      where: {
+        questionnaireLinks: {
+          some: { questionnaire_id: questionnaireId },
+        },
+      },
+      include: {
+        answers: true,
+      },
+      orderBy: {
+        id_question: 'asc',
+      },
+    });
+
+    if (!rows || rows.length == 0) {
+      return Err.of(
+        new NotFoundError('Aucune question trouvée pour ce questionnaire')
+      );
+    }
+
+    return Ok.of(
+      rows.map((row) => ({
+        id: row.id_question,
+        label: row.title,
+        questionnaireId,
+        answers: row.answers.map((a) => ({
+          id: a.id_answer,
+          text: a.text,
+          isCorrect: a.is_correct,
+          questionId: a.question_id,
+          createdAt: a.created_at,
+          updatedAt: a.updated_at,
+        })),
+        createdAt: row.created_at,
+        updatedAt: row.updated_at,
+      }))
+    );
+  }
+
   async createQuestion(
     command: CreateQuestionCommand
   ): Promise<Result<void, AppError>> {
