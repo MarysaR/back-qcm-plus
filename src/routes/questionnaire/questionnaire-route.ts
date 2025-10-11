@@ -22,6 +22,7 @@ questionnaireRouter.get(
 
 questionnaireRouter.post(
   '/questionnaire',
+  authMiddleware,
   questionnaireController.createQuestionnaire.bind(questionnaireController)
 );
 
