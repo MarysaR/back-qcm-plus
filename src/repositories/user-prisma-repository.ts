@@ -69,7 +69,6 @@ export class UserPrismaRepository implements UserRepository {
   async createUser(
     user: User
   ): Promise<Ok<void, AppError> | Err<void, AppError>> {
-    console.log('createUser called with:', user);
 
     const result = await prisma.appUser.create({
       data: {
