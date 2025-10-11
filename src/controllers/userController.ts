@@ -1,16 +1,10 @@
 import { Request, Response } from 'express';
-import {
-  GetUsersUseCase,
-  CreateUserUseCase,
-  PasswordHasher,
-} from 'logic-qcm-plus';
+import { CreateUserUseCase, PasswordHasher } from 'logic-qcm-plus';
 import { UserPrismaRepository } from '../repositories/user-prisma-repository';
-import { ValidationError, AlreadyExistError } from 'logic-qcm-plus';
 import { HTTP_STATUS } from '../constants/httpStatus';
 import { BcryptPasswordHasher } from '../providers/bcryptPasswordHasher';
 
 export class UserController {
-  private readonly getUsersUseCase = new GetUsersUseCase();
   private userRepository = new UserPrismaRepository();
   private passwordHasher: PasswordHasher = new BcryptPasswordHasher();
   private createUserUseCase = new CreateUserUseCase(
@@ -18,19 +12,7 @@ export class UserController {
     this.passwordHasher
   );
 
-  public getUsers(req: Request, res: Response): void {
-    const result = this.getUsersUseCase.execute();
-    if (result.isOk()) {
-      res.status(HTTP_STATUS.OK).json({ users: result.value });
-    } else {
-      res.status(HTTP_STATUS.NOT_FOUND).json({ error: result.error.message });
-    }
-  }
-
   public async createUser(req: Request, res: Response): Promise<void> {
-    console.log('Requête reçue dans controlleur:', req.body);
-    console.log('Utilisateur courant coté back:', req.body.currentUserRoleId);
-
     const user = req.body;
     const curentUserRoleId = req.body.currentUserRoleId;
 
@@ -46,17 +28,12 @@ export class UserController {
       user
     );
 
-    if (
-      result instanceof ValidationError ||
-      result instanceof AlreadyExistError
-    ) {
-      res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.message });
-    } else if (result.isOk()) {
-      res.status(HTTP_STATUS.CREATED).json({ user: result.value });
+    if (result.isErr()) {
+      res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.message });
     } else {
       res
-        .status(HTTP_STATUS.INTERNAL_SERVER_ERROR)
-        .json({ error: 'Internal server error' });
+        .status(HTTP_STATUS.CREATED)
+        .json({ message: 'Utilisateur créé avec succès' });
     }
   }
 }

@@ -8,7 +8,6 @@ import {
   TechnicalError,
   User,
   UserRepository,
-  ValidationError,
 } from 'logic-qcm-plus';
 import prisma from '../config/prisma';
 
@@ -64,11 +63,6 @@ export class UserPrismaRepository implements UserRepository {
         isActive: user.role.is_active,
         description: user.role.description ?? undefined,
       },
-      company: user.company ?? '',
-      firstName: user.first_name,
-      lastName: user.last_name,
-      createdAt: user.created_at,
-      updatedAt: user.updated_at,
     };
   }
 
@@ -77,42 +71,31 @@ export class UserPrismaRepository implements UserRepository {
   ): Promise<Ok<void, AppError> | Err<void, AppError>> {
     console.log('createUser called with:', user);
 
-    const result = await prisma.appUser
-      .create({
-        data: {
-          first_name: user.firstName,
-          last_name: user.lastName,
-          login: user.login,
-          password: user.password,
-          company: user.company,
-          email: user.email,
-          role: {
-            connect: { id_role: user.roleId },
-          },
-          is_active: user.isActive,
-          created_at: user.createdAt,
-          updated_at: user.updatedAt,
+    const result = await prisma.appUser.create({
+      data: {
+        first_name: user.firstName,
+        last_name: user.lastName,
+        login: user.login,
+        password: user.password,
+        company: user.company,
+        email: user.email,
+        role: {
+          connect: { id_role: user.roleId },
         },
-      })
-      .then(() => Ok.of(undefined))
-      .catch((error: any) => {
-        console.error('Erreur Prisma lors de la création du user :', error);
+        is_active: user.isActive,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt,
+      },
+    });
 
-        if (error.code === 'P2002') {
-          return Err.of(
-            new ValidationError(
-              `Un utilisateur avec cet email ou login existe déjà.`
-            )
-          );
-        }
+    if (!result) {
+      return Err.of(
+        new TechnicalError(
+          "Erreur technique lors de la création de l'utilisateur."
+        )
+      );
+    }
 
-        return Err.of(
-          new TechnicalError(
-            `Erreur lors de la création de l'utilisateur : ${error.message}`
-          )
-        );
-      });
-
-    return result as Ok<void, AppError> | Err<void, AppError>;
+    return Ok.of(undefined);
   }
 }

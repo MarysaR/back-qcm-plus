@@ -1,25 +1,14 @@
 import { Router } from 'express';
 import { UserController } from '../controllers/userController';
+import { authMiddleware } from '../middlewares/authMiddleware';
 
 const userRouter = Router();
 const userController = new UserController();
 
-/**
- * @route GET /users
- * @desc Récupère tous les utilisateurs (pagination)
- * @access Public (pas de middleware ici)
- */
-userRouter.get('/users', (req, res) => {
-  userController.getUsers(req, res);
-});
-
-/**
- * @route POST /users
- * @desc Crée un nouvel utilisateur
- * @access Public (pas de middleware ici)
- */
-userRouter.post('/users', (req, res) => {
-  userController.createUser(req, res);
-});
+userRouter.post(
+  '/users',
+  authMiddleware,
+  userController.createUser.bind(userController)
+);
 
 export default userRouter;
