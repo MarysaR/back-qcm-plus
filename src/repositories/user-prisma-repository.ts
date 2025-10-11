@@ -11,6 +11,24 @@ import {
 import prisma from '../config/prisma';
 
 export class UserPrismaRepository implements UserRepository {
+  async createUser(user: User): Promise<Result<void, AppError>> {
+    // TODO: Mathieu, je te laisse gérer j'en avais besoin pour mes tests
+    await prisma.appUser.create({
+      data: {
+        first_name: user.firstName,
+        last_name: user.lastName,
+        login: user.login,
+        email: user.email,
+        password: user.password,
+        company: user.company,
+        is_active: user.isActive,
+        role_id: user.roleId,
+      },
+    });
+
+    return Ok.of<void, AppError>(undefined); // TODO: pareil ici le retour n'est pas le bon
+  }
+
   async getUserByEmail(email: string): Promise<Result<User, AppError>> {
     const user = await prisma.appUser.findUnique({
       where: { email },

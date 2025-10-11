@@ -11,6 +11,19 @@ import {
 import { Questionnaire as PrismaQuestionnaire } from '@prisma/client';
 
 export class QuestionnairePrismaRepository implements QuestionnaireRepository {
+  async getQuestionnaireById(
+    id: number
+  ): Promise<Result<Questionnaire, AppError>> {
+    const row = await prisma.questionnaire.findUnique({
+      where: { id_questionnaire: id },
+    });
+    if (!row) {
+      return Err.of(new NotFoundError('Questionnaire introuvable'));
+    }
+
+    return Ok.of(this.map(row));
+  }
+
   async getQuestionnaireByName(
     name: string
   ): Promise<Result<Questionnaire, AppError>> {
