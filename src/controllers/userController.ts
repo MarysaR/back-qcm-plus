@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { CreateUserUseCase, PasswordHasher } from 'logic-qcm-plus';
+import { CreateUserUseCase, PasswordHasher, RoleEnum } from 'logic-qcm-plus';
 import { UserPrismaRepository } from '../repositories/user-prisma-repository';
 import { HTTP_STATUS } from '../constants/httpStatus';
 import { BcryptPasswordHasher } from '../providers/bcryptPasswordHasher';
@@ -14,9 +14,10 @@ export class UserController {
 
   public async createUser(req: Request, res: Response): Promise<void> {
     const user = req.body;
-    const curentUserRoleId = req.body.currentUserRoleId;
 
-    if (!curentUserRoleId || curentUserRoleId !== 1) {
+    const curentUserRoleId = req.claims?.roleId;
+
+    if (!curentUserRoleId || curentUserRoleId !== RoleEnum.ADMIN) {
       res
         .status(HTTP_STATUS.FORBIDDEN)
         .json({ error: 'Accès interdit : rôle ADMIN requis.' });
