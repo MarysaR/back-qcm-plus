@@ -31,3 +31,4 @@ vendor
 
 /src/generated/prisma
 /prisma/migrations
+.idea
