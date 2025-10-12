@@ -5,29 +5,14 @@ import {
   NotFoundError,
   Ok,
   Result,
+  TechnicalError,
   User,
   UserRepository,
 } from 'logic-qcm-plus';
 import prisma from '../config/prisma';
 
 export class UserPrismaRepository implements UserRepository {
-  async createUser(user: User): Promise<Result<void, AppError>> {
-    // TODO: Mathieu, je te laisse gérer j'en avais besoin pour mes tests
-    await prisma.appUser.create({
-      data: {
-        first_name: user.firstName,
-        last_name: user.lastName,
-        login: user.login,
-        email: user.email,
-        password: user.password,
-        company: user.company,
-        is_active: user.isActive,
-        role_id: user.roleId,
-      },
-    });
 
-    return Ok.of<void, AppError>(undefined); // TODO: pareil ici le retour n'est pas le bon
-  }
 
   async getUserByEmail(email: string): Promise<Result<User, AppError>> {
     const user = await prisma.appUser.findUnique({
@@ -81,5 +66,36 @@ export class UserPrismaRepository implements UserRepository {
         description: user.role.description ?? undefined,
       },
     };
+  }
+
+  async createUser(
+    user: User
+  ): Promise<Ok<void, AppError> | Err<void, AppError>> {
+    const result = await prisma.appUser.create({
+      data: {
+        first_name: user.firstName,
+        last_name: user.lastName,
+        login: user.login,
+        password: user.password,
+        company: user.company,
+        email: user.email,
+        role: {
+          connect: { id_role: user.roleId },
+        },
+        is_active: user.isActive,
+        created_at: user.createdAt,
+        updated_at: user.updatedAt,
+      },
+    });
+
+    if (!result) {
+      return Err.of(
+        new TechnicalError(
+          "Erreur technique lors de la création de l'utilisateur."
+        )
+      );
+    }
+
+    return Ok.of(undefined);
   }
 }
