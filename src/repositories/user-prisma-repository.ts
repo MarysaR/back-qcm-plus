@@ -12,8 +12,6 @@ import {
 import prisma from '../config/prisma';
 
 export class UserPrismaRepository implements UserRepository {
-
-
   async getUserByEmail(email: string): Promise<Result<User, AppError>> {
     const user = await prisma.appUser.findUnique({
       where: { email },
@@ -68,23 +66,21 @@ export class UserPrismaRepository implements UserRepository {
     };
   }
 
-  async createUser(
-    user: User
-  ): Promise<Ok<void, AppError> | Err<void, AppError>> {
+  async createUser(newUser: User): Promise<Result<void, AppError>> {
     const result = await prisma.appUser.create({
       data: {
-        first_name: user.firstName,
-        last_name: user.lastName,
-        login: user.login,
-        password: user.password,
-        company: user.company,
-        email: user.email,
+        first_name: newUser.firstName,
+        last_name: newUser.lastName,
+        login: newUser.login,
+        password: newUser.password,
+        company: newUser.company,
+        email: newUser.email,
         role: {
-          connect: { id_role: user.roleId },
+          connect: { id_role: newUser.roleId },
         },
-        is_active: user.isActive,
-        created_at: user.createdAt,
-        updated_at: user.updatedAt,
+        is_active: newUser.isActive,
+        created_at: newUser.createdAt,
+        updated_at: newUser.updatedAt,
       },
     });
 

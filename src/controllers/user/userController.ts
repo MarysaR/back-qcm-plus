@@ -1,5 +1,9 @@
 import { Request, Response } from 'express';
-import { CreateUserUseCase, PasswordHasher, RoleEnum } from 'logic-qcm-plus';
+import {
+  CreateUserCommand,
+  CreateUserUseCase,
+  PasswordHasher,
+} from 'logic-qcm-plus';
 import { UserPrismaRepository } from '../../repositories/user-prisma-repository';
 import { HTTP_STATUS } from '../../constants/httpStatus';
 import { BcryptPasswordHasher } from '../../providers/bcryptPasswordHasher';
@@ -14,14 +18,16 @@ export class UserController {
   );
 
   public async createUser(req: Request, res: Response): Promise<void> {
-    const user = req.body;
+    const newUser = req.body;
 
-    const curentUserRoleId = claimsToUser(req.claims).roleId;
+    const currentUser = claimsToUser(req.claims).roleId;
 
-    const result = await this.createUserUseCase.createUser(
-      curentUserRoleId,
-      user
-    );
+    const command: CreateUserCommand = {
+      newUser,
+      currentUser,
+    };
+
+    const result = await this.createUserUseCase.execute(command);
 
     if (result.isErr()) {
       res.status(HTTP_STATUS.BAD_REQUEST).json({ error: result.error.message });
