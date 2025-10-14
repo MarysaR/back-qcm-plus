@@ -11,6 +11,27 @@ import {
 import { Questionnaire as PrismaQuestionnaire } from '@prisma/client';
 
 export class QuestionnairePrismaRepository implements QuestionnaireRepository {
+  async getAllQuestionnaires(): Promise<Result<Questionnaire[], AppError>> {
+    const rows = await prisma.questionnaire.findMany({
+      orderBy: { created_at: 'desc' },
+    });
+
+    if (!rows || rows.length == 0) {
+      return Err.of(new NotFoundError('Aucun questionnaire trouvé'));
+    }
+
+    const questionnaires: Questionnaire[] = rows.map((row) => ({
+      id: row.id_questionnaire,
+      name: row.name,
+      description: row.description ?? undefined,
+      isActive: row.is_active,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    }));
+
+    return Ok.of(questionnaires);
+  }
+
   async getQuestionnaireById(
     id: number
   ): Promise<Result<Questionnaire, AppError>> {

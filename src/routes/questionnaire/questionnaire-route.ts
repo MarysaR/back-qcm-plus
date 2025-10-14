@@ -9,6 +9,12 @@ const questionController = new QuestionController();
 const questionnaireRouter = Router();
 
 questionnaireRouter.get(
+  '/questionnaires',
+  authMiddleware,
+  questionnaireController.getAllQuestionnaires.bind(questionnaireController)
+);
+
+questionnaireRouter.get(
   '/questionnaire/:id/questions',
   authMiddleware,
   questionController.getQuestionsOfQuestionnaire.bind(questionController)
