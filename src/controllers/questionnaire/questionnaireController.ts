@@ -12,13 +12,40 @@ import {
   Ok,
   Err,
   ValidationError,
-  NotFoundError,
   GetQuestionnaireByIdUseCase,
   PermissionDeniedError,
+  GetAllQuestionnairesUseCase,
 } from 'logic-qcm-plus';
 import { QuestionnairePrismaRepository } from '../../repositories/questionnaire-prisma-repository';
 
 export class QuestionnaireController {
+  @CatchErrors()
+  @HandleResult()
+  async getAllQuestionnaires(
+    req: Request,
+    _res: Response
+  ): Promise<Result<Questionnaire[], AppError>> {
+    const currentUser = claimsToUser(req.claims);
+
+    if (!currentUser) {
+      return Err.of(new PermissionDeniedError('Utilisateur non authentifié'));
+    }
+
+    const questionnaireRepository: QuestionnaireRepository =
+      new QuestionnairePrismaRepository();
+    const getAllQuestionnairesUseCase = new GetAllQuestionnairesUseCase(
+      questionnaireRepository
+    );
+
+    const result = await getAllQuestionnairesUseCase.execute(currentUser);
+
+    if (result.isErr()) {
+      return Err.of(result.error);
+    }
+
+    return Ok.of(result.value);
+  }
+
   @CatchErrors()
   @HandleResult()
   async getQuestionnaireById(
