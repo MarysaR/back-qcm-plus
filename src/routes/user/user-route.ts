@@ -11,12 +11,10 @@ userRouter.post(
   userController.createUser.bind(userController)
 );
 
-
 userRouter.get(
   '/users',
   authMiddleware,
   userController.getAllUsers.bind(userController)
 );
-
 
 export default userRouter;

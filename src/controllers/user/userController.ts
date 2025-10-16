@@ -54,7 +54,6 @@ export class UserController {
     return Ok.of(undefined);
   }
 
-
   @CatchErrors()
   @HandleResult()
   async getAllUsers(
@@ -78,6 +77,4 @@ export class UserController {
 
     return Ok.of(result.value);
   }
-
-  
 }

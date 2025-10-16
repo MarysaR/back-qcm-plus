@@ -96,9 +96,6 @@ export class UserPrismaRepository implements UserRepository {
     return Ok.of(undefined);
   }
 
-
-  
-
   async getAllUsers(): Promise<Result<User[], AppError>> {
     const rows = await prisma.appUser.findMany({
       include: {
@@ -135,6 +132,4 @@ export class UserPrismaRepository implements UserRepository {
 
     return Ok.of(users);
   }
-
-
 }
