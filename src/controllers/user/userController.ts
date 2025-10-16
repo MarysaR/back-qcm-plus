@@ -4,10 +4,12 @@ import {
   AppError,
   CreateUserCommand,
   CreateUserUseCase,
+  GetAllUsersUseCase,
   Err,
   Ok,
   PermissionDeniedError,
   Result,
+  User,
   ValidationError,
 } from 'logic-qcm-plus';
 import { CatchErrors } from '../../utils/catchErrors';
@@ -51,4 +53,31 @@ export class UserController {
 
     return Ok.of(undefined);
   }
+
+
+  @CatchErrors()
+  @HandleResult()
+  async getAllUsers(
+    req: Request,
+    _res: Response
+  ): Promise<Result<User[], AppError>> {
+    const currentUser = claimsToUser(req.claims);
+
+    if (!currentUser) {
+      return Err.of(new PermissionDeniedError('Utilisateur non authentifié'));
+    }
+
+    const userRepository = new UserPrismaRepository();
+    const getAllUsersUseCase = new GetAllUsersUseCase(userRepository);
+
+    const result = await getAllUsersUseCase.execute(currentUser);
+
+    if (result.isErr()) {
+      return Err.of(result.error);
+    }
+
+    return Ok.of(result.value);
+  }
+
+  
 }
