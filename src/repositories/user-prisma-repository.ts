@@ -5,6 +5,7 @@ import {
   NotFoundError,
   Ok,
   Result,
+  RoleEnum,
   TechnicalError,
   User,
   UserRepository,
@@ -93,5 +94,42 @@ export class UserPrismaRepository implements UserRepository {
     }
 
     return Ok.of(undefined);
+  }
+
+  async getAllUsers(): Promise<Result<User[], AppError>> {
+    const rows = await prisma.appUser.findMany({
+      include: {
+        role: true,
+      },
+      orderBy: {
+        created_at: 'desc',
+      },
+    });
+
+    if (!rows || rows.length === 0) {
+      return Err.of(new NotFoundError('Aucun utilisateur trouvé'));
+    }
+
+    const users: User[] = rows.map((row) => ({
+      id: row.id_user,
+      firstName: row.first_name,
+      lastName: row.last_name,
+      login: row.login,
+      email: row.email,
+      password: row.password,
+      company: row.company ?? undefined,
+      isActive: row.is_active,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+      roleId: row.role_id as RoleEnum,
+      role: {
+        id: row.role.id_role,
+        name: row.role.name,
+        isActive: row.role.is_active,
+        description: row.role.description ?? undefined,
+      },
+    }));
+
+    return Ok.of(users);
   }
 }
