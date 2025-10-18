@@ -13,6 +13,7 @@ import {
   Question,
   AppError,
   UpdateQuestionUseCase,
+  GetQuestionByIdUseCase,
 } from 'logic-qcm-plus';
 import { CatchErrors } from '../../utils/catchErrors';
 import { HandleResult } from '../../utils/handleResult';
@@ -45,6 +46,32 @@ export class QuestionController {
       currentUser,
       Number(id)
     );
+    if (result.isErr()) {
+      return Err.of(result.error);
+    }
+
+    return result;
+  }
+
+  @CatchErrors()
+  @HandleResult()
+  async getQuestionById(
+    req: Request,
+    _res: Response
+  ): Promise<Result<Question, AppError>> {
+    if (!req.claims) {
+      return Err.of(new PermissionDeniedError('Utilisateur non authentifié'));
+    }
+
+    const id = Number(req.params.id);
+    if (!id || id <= 0 || isNaN(id)) {
+      return Err.of(new ValidationError('Identifiant de question invalide'));
+    }
+
+    const currentUser = claimsToUser(req.claims);
+    const useCase = new GetQuestionByIdUseCase(new QuestionPrismaRepository());
+
+    const result = await useCase.execute(currentUser, id);
     if (result.isErr()) {
       return Err.of(result.error);
     }
