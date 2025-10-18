@@ -15,6 +15,8 @@ import {
   GetQuestionnaireByIdUseCase,
   PermissionDeniedError,
   GetAllQuestionnairesUseCase,
+  UpdateQuestionnaireUseCase,
+  UpdateQuestionnaireCommand,
 } from 'logic-qcm-plus';
 import { QuestionnairePrismaRepository } from '../../repositories/questionnaire-prisma-repository';
 
@@ -116,5 +118,49 @@ export class QuestionnaireController {
     }
 
     return Ok.of(undefined);
+  }
+
+  @CatchErrors()
+  @HandleResult()
+  async updateQuestionnaire(
+    req: Request,
+    _res: Response
+  ): Promise<Result<Questionnaire, AppError>> {
+    const idParam = Number(req.params.id);
+    if (!req.params.id || isNaN(idParam) || idParam <= 0) {
+      return Err.of(
+        new ValidationError('Identifiant de questionnaire invalide')
+      );
+    }
+
+    const { name, description } = req.body;
+    if (typeof name != 'string') {
+      return Err.of(
+        new ValidationError('Le nom du questionnaire est invalide')
+      );
+    }
+
+    const currentUser = claimsToUser(req.claims);
+    if (!currentUser) {
+      return Err.of(new PermissionDeniedError('Utilisateur non authentifié'));
+    }
+
+    const command: UpdateQuestionnaireCommand = {
+      id: idParam,
+      name,
+      ...(description !== undefined && { description }),
+      updatedAt: new Date(),
+    };
+
+    const useCase = new UpdateQuestionnaireUseCase(
+      new QuestionnairePrismaRepository()
+    );
+
+    const result = await useCase.execute(currentUser, command);
+    if (result.isErr()) {
+      return Err.of(result.error);
+    }
+
+    return Ok.of(result.value);
   }
 }

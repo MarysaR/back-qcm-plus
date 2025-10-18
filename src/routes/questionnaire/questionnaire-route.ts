@@ -32,4 +32,10 @@ questionnaireRouter.post(
   questionnaireController.createQuestionnaire.bind(questionnaireController)
 );
 
+questionnaireRouter.put(
+  '/questionnaire/:id',
+  authMiddleware,
+  questionnaireController.updateQuestionnaire.bind(questionnaireController)
+);
+
 export default questionnaireRouter;
