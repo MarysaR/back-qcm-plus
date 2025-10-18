@@ -61,6 +61,43 @@ export class QuestionPrismaRepository implements QuestionRepository {
     );
   }
 
+  async getQuestionById(id: number): Promise<Result<Question, AppError>> {
+    const row = await prisma.question.findUnique({
+      where: { id_question: id },
+      include: {
+        answers: true,
+        questionnaireLinks: true,
+      },
+    });
+
+    if (!row) {
+      return Err.of(new NotFoundError('Question introuvable'));
+    }
+
+    const questionnaireId =
+      row.questionnaireLinks && row.questionnaireLinks.length > 0
+        ? row.questionnaireLinks[0].questionnaire_id
+        : 0;
+
+    const question: Question = {
+      id: row.id_question,
+      label: row.title,
+      questionnaireId,
+      answers: row.answers.map((a) => ({
+        id: a.id_answer,
+        text: a.text,
+        isCorrect: a.is_correct,
+        questionId: a.question_id,
+        createdAt: a.created_at,
+        updatedAt: a.updated_at,
+      })),
+      createdAt: row.created_at,
+      updatedAt: row.updated_at,
+    };
+
+    return Ok.of(question);
+  }
+
   async createQuestion(
     command: CreateQuestionCommand
   ): Promise<Result<void, AppError>> {
