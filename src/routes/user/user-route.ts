@@ -6,7 +6,7 @@ const userRouter = Router();
 const userController = new UserController();
 
 userRouter.post(
-  '/users',
+  '/users/new',
   authMiddleware,
   userController.createUser.bind(userController)
 );
