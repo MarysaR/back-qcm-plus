@@ -7,6 +7,8 @@ import {
   Err,
   AppError,
   NotFoundError,
+  TechnicalError,
+  UpdateQuestionnaireCommand,
 } from 'logic-qcm-plus';
 import { Questionnaire as PrismaQuestionnaire } from '@prisma/client';
 
@@ -63,6 +65,46 @@ export class QuestionnairePrismaRepository implements QuestionnaireRepository {
       },
     });
     return Ok.of(undefined);
+  }
+
+  async updateQuestionnaire(
+    command: UpdateQuestionnaireCommand
+  ): Promise<Result<Questionnaire, AppError>> {
+    const existing = await prisma.questionnaire.findUnique({
+      where: { id_questionnaire: command.id },
+    });
+
+    if (!existing) {
+      return Err.of(new NotFoundError('Questionnaire introuvable'));
+    }
+
+    const updated = await prisma.questionnaire.update({
+      where: { id_questionnaire: command.id },
+      data: {
+        name: command.name,
+        ...(command.description != undefined && {
+          description: command.description || null,
+        }),
+        updated_at: new Date(),
+      },
+    });
+
+    if (!updated) {
+      return Err.of(
+        new TechnicalError(
+          'Erreur technique lors de la mise à jour du questionnaire'
+        )
+      );
+    }
+
+    return Ok.of({
+      id: updated.id_questionnaire,
+      name: updated.name,
+      description: updated.description ?? undefined,
+      isActive: updated.is_active,
+      createdAt: updated.created_at,
+      updatedAt: updated.updated_at,
+    });
   }
 
   private map(row: PrismaQuestionnaire): Questionnaire {
