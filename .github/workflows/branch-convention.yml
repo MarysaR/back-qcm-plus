@@ -3,9 +3,9 @@ name: Branch Convention
 on:
   push:
     tags-ignore:
-      - '**'
+      - "**"
     branches:
-      - '**'
+      - "**"
 
 jobs:
   branch-convention:
@@ -18,11 +18,15 @@ jobs:
           echo "Événement déclenché : $GITHUB_EVENT_NAME"
           echo "Branche en cours : $branch_name"
 
+          # Interdire push direct sur main et develop sauf si c'est un merge de PR
           if [[ "$GITHUB_EVENT_NAME" == "push" && ("$branch_name" == "main" || "$branch_name" == "develop") ]]; then
-            echo "::error ::Push direct interdit sur la branche '$branch_name'. Utilisez une PR."
-            exit 1
+            if [[ "${{ github.event.head_commit.message }}" != "Merge pull request"* ]]; then
+              echo "::error ::Push direct interdit sur la branche '$branch_name'. Utilisez une PR."
+              exit 1
+            fi
           fi
 
+          # Vérification des conventions de nommage
           if [[ ! "$branch_name" =~ ^(feat|fix|chore|refactor)/ ]] && [[ "$branch_name" != "main" && "$branch_name" != "develop" ]]; then
             echo "::error ::Nom de branche non conforme : '$branch_name'. Préfixes autorisés : feat/, fix/, chore/, refactor/"
             exit 1
