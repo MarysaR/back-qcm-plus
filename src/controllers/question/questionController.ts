@@ -12,6 +12,7 @@ import {
   Result,
   Question,
   AppError,
+  UpdateQuestionUseCase,
 } from 'logic-qcm-plus';
 import { CatchErrors } from '../../utils/catchErrors';
 import { HandleResult } from '../../utils/handleResult';
@@ -84,5 +85,55 @@ export class QuestionController {
     }
 
     return Ok.of(undefined);
+  }
+
+  @CatchErrors()
+  @HandleResult()
+  async updateQuestion(
+    req: Request,
+    _res: Response
+  ): Promise<Result<Question, AppError>> {
+    if (!req.claims) {
+      return Err.of(new PermissionDeniedError('Utilisateur non authentifié'));
+    }
+
+    const questionId = Number(req.params.id);
+    if (!req.params.id || isNaN(questionId) || questionId <= 0) {
+      return Err.of(new ValidationError('Identifiant de question invalide'));
+    }
+
+    const { label, questionnaireId, answers } = req.body;
+    if (typeof label != 'string') {
+      return Err.of(
+        new ValidationError('Le libellé de la question est invalide')
+      );
+    }
+
+    if (typeof questionnaireId != 'number') {
+      return Err.of(
+        new ValidationError('Identifiant de questionnaire invalide')
+      );
+    }
+
+    if (!Array.isArray(answers)) {
+      return Err.of(new ValidationError('Les réponses sont invalides'));
+    }
+
+    const updateQuestionUseCase = new UpdateQuestionUseCase(
+      new QuestionPrismaRepository()
+    );
+    const currentUser = claimsToUser(req.claims);
+
+    const result = await updateQuestionUseCase.execute(currentUser, {
+      ...req.body,
+      questionId,
+      updatedAt: new Date(),
+    });
+
+    if (result.isErr()) {
+      return Err.of(result.error);
+    }
+
+    return Ok.of(result.value);
   }
 }

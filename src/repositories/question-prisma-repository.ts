@@ -16,6 +16,7 @@ import {
 } from 'logic-qcm-plus';
 
 import prisma from '../config/prisma';
+import { UpdateQuestionCommand } from 'logic-qcm-plus/dist/commands/question/updateQuestionCommand';
 
 export class QuestionPrismaRepository implements QuestionRepository {
   async getQuestionsOfQuestionnaire(
@@ -102,5 +103,92 @@ export class QuestionPrismaRepository implements QuestionRepository {
     }
 
     return Ok.of(undefined);
+  }
+
+  async updateQuestion(
+    command: UpdateQuestionCommand
+  ): Promise<Result<Question, AppError>> {
+    const existingQuestion = await prisma.question.findUnique({
+      where: { id_question: command.questionId },
+      include: { answers: true },
+    });
+
+    if (!existingQuestion) {
+      return Err.of(new NotFoundError('Question introuvable'));
+    }
+
+    const updatedQuestion = await prisma.question.update({
+      where: { id_question: command.questionId },
+      data: {
+        title: command.label,
+        updated_at: command.updatedAt,
+      },
+    });
+
+    if (!updatedQuestion) {
+      return Err.of(
+        new TechnicalError(
+          'Erreur technique lors de la mise à jour de la question'
+        )
+      );
+    }
+
+    const deleteResult = await prisma.answer.deleteMany({
+      where: { question_id: command.questionId },
+    });
+
+    if (deleteResult.count == 0 && existingQuestion.answers.length > 0) {
+      return Err.of(
+        new TechnicalError(
+          'Erreur technique lors de la suppression des réponses existantes'
+        )
+      );
+    }
+
+    const createResult = await prisma.answer.createMany({
+      data: command.answers.map((a, index) => ({
+        text: a.text,
+        is_correct: a.isCorrect,
+        display_order: index,
+        question_id: command.questionId,
+      })),
+    });
+
+    if (createResult.count == 0) {
+      return Err.of(
+        new TechnicalError(
+          'Erreur technique lors de la création des nouvelles réponses'
+        )
+      );
+    }
+
+    const refreshed = await prisma.question.findUnique({
+      where: { id_question: command.questionId },
+      include: { answers: true },
+    });
+
+    if (!refreshed) {
+      return Err.of(
+        new TechnicalError(
+          'Erreur technique lors du rechargement de la question'
+        )
+      );
+    }
+
+    return Ok.of({
+      id: refreshed.id_question,
+      label: refreshed.title,
+      questionnaireId: command.questionnaireId,
+      answers: refreshed.answers.map((a) => ({
+        id: a.id_answer,
+        text: a.text,
+        isCorrect: a.is_correct,
+        questionId: a.question_id,
+        createdAt: a.created_at,
+        updatedAt: a.updated_at,
+      })),
+      createdAt: refreshed.created_at,
+      updatedAt: refreshed.updated_at,
+    });
   }
 }
