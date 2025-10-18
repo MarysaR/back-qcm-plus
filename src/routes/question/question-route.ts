@@ -11,4 +11,10 @@ questionRouter.post(
   questionController.createQuestion.bind(questionController)
 );
 
+questionRouter.put(
+  '/questions/:id',
+  authMiddleware,
+  questionController.updateQuestion.bind(questionController)
+);
+
 export default questionRouter;
