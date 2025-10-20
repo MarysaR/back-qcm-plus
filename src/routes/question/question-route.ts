@@ -23,4 +23,10 @@ questionRouter.put(
   questionController.updateQuestion.bind(questionController)
 );
 
+questionRouter.delete(
+  '/questions/:id',
+  authMiddleware,
+  questionController.deleteQuestion.bind(questionController)
+);
+
 export default questionRouter;

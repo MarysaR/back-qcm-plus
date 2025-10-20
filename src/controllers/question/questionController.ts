@@ -7,13 +7,13 @@ import {
   Err,
   Ok,
   GetQuestionsOfQuestionnaireUseCase,
-  NotFoundError,
   PermissionDeniedError,
   Result,
   Question,
   AppError,
   UpdateQuestionUseCase,
   GetQuestionByIdUseCase,
+  DeleteQuestionUseCase,
 } from 'logic-qcm-plus';
 import { CatchErrors } from '../../utils/catchErrors';
 import { HandleResult } from '../../utils/handleResult';
@@ -162,5 +162,33 @@ export class QuestionController {
     }
 
     return Ok.of(result.value);
+  }
+
+  @CatchErrors()
+  @HandleResult()
+  async deleteQuestion(
+    req: Request,
+    _res: Response
+  ): Promise<Result<void, AppError>> {
+    if (!req.claims) {
+      return Err.of(new PermissionDeniedError('Utilisateur non authentifié'));
+    }
+
+    const questionId = Number(req.params.id);
+    if (!req.params.id || isNaN(questionId) || questionId <= 0) {
+      return Err.of(new ValidationError('Identifiant de question invalide'));
+    }
+
+    const currentUser = claimsToUser(req.claims);
+    const deleteQuestionUseCase = new DeleteQuestionUseCase(
+      new QuestionPrismaRepository()
+    );
+
+    const result = await deleteQuestionUseCase.execute(currentUser, questionId);
+    if (result.isErr()) {
+      return Err.of(result.error);
+    }
+
+    return Ok.of(undefined);
   }
 }
