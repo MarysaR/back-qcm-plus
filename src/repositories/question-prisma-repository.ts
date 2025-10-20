@@ -228,4 +228,37 @@ export class QuestionPrismaRepository implements QuestionRepository {
       updatedAt: refreshed.updated_at,
     });
   }
+
+  async deleteQuestion(id: number): Promise<Result<void, AppError>> {
+    const existing = await prisma.question.findUnique({
+      where: { id_question: id },
+      include: { answers: true, questionnaireLinks: true },
+    });
+    if (!existing) {
+      return Err.of(new NotFoundError('Question introuvable'));
+    }
+
+    const deleted = await prisma.$transaction(async (tx) => {
+      await tx.answer.deleteMany({
+        where: { question_id: id },
+      });
+
+      await tx.questionnaireQuestion.deleteMany({
+        where: { question_id: id },
+      });
+
+      return await tx.question.delete({
+        where: { id_question: id },
+      });
+    });
+    if (!deleted) {
+      return Err.of(
+        new TechnicalError(
+          'Erreur technique lors de la suppression de la question'
+        )
+      );
+    }
+
+    return Ok.of(undefined);
+  }
 }
