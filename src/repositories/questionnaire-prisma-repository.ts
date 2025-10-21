@@ -107,6 +107,31 @@ export class QuestionnairePrismaRepository implements QuestionnaireRepository {
     });
   }
 
+  async deleteQuestionnaire(id: number): Promise<Result<void, AppError>> {
+    const existing = await prisma.questionnaire.findUnique({
+      where: { id_questionnaire: id },
+    });
+    if (!existing) {
+      return Err.of(new NotFoundError('Questionnaire introuvable'));
+    }
+
+    await prisma.questionnaireQuestion.deleteMany({
+      where: { questionnaire_id: id },
+    });
+
+    const deleted = await prisma.questionnaire.delete({
+      where: { id_questionnaire: id },
+    });
+    if (!deleted) {
+      return Err.of(
+        new TechnicalError(
+          'Erreur technique lors de la suppression du questionnaire'
+        )
+      );
+    }
+    return Ok.of(undefined);
+  }
+
   private map(row: PrismaQuestionnaire): Questionnaire {
     return {
       id: row.id_questionnaire,
