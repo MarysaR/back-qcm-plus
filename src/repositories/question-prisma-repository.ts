@@ -238,7 +238,7 @@ export class QuestionPrismaRepository implements QuestionRepository {
       return Err.of(new NotFoundError('Question introuvable'));
     }
 
-    const deleted = await prisma.$transaction(async (tx) => {
+    await prisma.$transaction(async (tx) => {
       await tx.answer.deleteMany({
         where: { question_id: id },
       });
@@ -251,13 +251,6 @@ export class QuestionPrismaRepository implements QuestionRepository {
         where: { id_question: id },
       });
     });
-    if (!deleted) {
-      return Err.of(
-        new TechnicalError(
-          'Erreur technique lors de la suppression de la question'
-        )
-      );
-    }
 
     return Ok.of(undefined);
   }
