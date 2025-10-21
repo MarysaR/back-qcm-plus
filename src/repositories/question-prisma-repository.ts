@@ -37,9 +37,7 @@ export class QuestionPrismaRepository implements QuestionRepository {
     });
 
     if (!rows || rows.length == 0) {
-      return Err.of(
-        new NotFoundError('Aucune question trouvée pour ce questionnaire')
-      );
+      return Ok.of([]);
     }
 
     return Ok.of(
