@@ -38,4 +38,10 @@ questionnaireRouter.put(
   questionnaireController.updateQuestionnaire.bind(questionnaireController)
 );
 
+questionnaireRouter.delete(
+  '/questionnaire/:id',
+  authMiddleware,
+  questionnaireController.deleteQuestionnaire.bind(questionnaireController)
+);
+
 export default questionnaireRouter;

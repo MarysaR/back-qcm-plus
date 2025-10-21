@@ -17,6 +17,7 @@ import {
   GetAllQuestionnairesUseCase,
   UpdateQuestionnaireUseCase,
   UpdateQuestionnaireCommand,
+  DeleteQuestionnaireUseCase,
 } from 'logic-qcm-plus';
 import { QuestionnairePrismaRepository } from '../../repositories/questionnaire-prisma-repository';
 
@@ -148,7 +149,7 @@ export class QuestionnaireController {
     const command: UpdateQuestionnaireCommand = {
       id: idParam,
       name,
-      ...(description !== undefined && { description }),
+      ...(description != undefined && { description }),
       updatedAt: new Date(),
     };
 
@@ -162,5 +163,33 @@ export class QuestionnaireController {
     }
 
     return Ok.of(result.value);
+  }
+
+  @CatchErrors()
+  @HandleResult()
+  async deleteQuestionnaire(
+    req: Request,
+    _res: Response
+  ): Promise<Result<void, AppError>> {
+    if (!req.claims) {
+      return Err.of(new PermissionDeniedError('Utilisateur non authentifié'));
+    }
+
+    const id = Number(req.params.id);
+    if (!req.params.id || isNaN(id) || id <= 0) {
+      return Err.of(
+        new ValidationError('Identifiant de questionnaire invalide')
+      );
+    }
+
+    const currentUser = claimsToUser(req.claims);
+    const useCase = new DeleteQuestionnaireUseCase(
+      new QuestionnairePrismaRepository()
+    );
+    const result = await useCase.execute(currentUser, id);
+    if (result.isErr()) {
+      return Err.of(result.error);
+    }
+    return Ok.of(undefined);
   }
 }
